@@ -28,7 +28,6 @@ C++ 컴파일 도중 C2664, C4996 오류가 발생하여 다음과 같이 수정
 
 ## 📸 실행 결과 화면
 
-![TCP 서버 실행 결과](./result.png)
 
 > **설명:** 서버 프로그램 실행 후 PowerShell/cmd에서 9000번 포트로 연결하여 메시지를 수신한 성공 화면입니다.
 <img width="1558" height="812" alt="image" src="https://github.com/user-attachments/assets/dfd4bd4b-bfe2-4e70-8b35-01f131e3a0e6" />
