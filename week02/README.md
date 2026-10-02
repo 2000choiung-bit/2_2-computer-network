@@ -26,8 +26,7 @@ C++ 컴파일 도중 C2664, C4996 오류가 발생하여 다음과 같이 수정
 
 ---
 
-## 📸 실행 결과 화면
+## 📸 실행 결과 화면<img width="1558" height="812" alt="image" src="https://github.com/user-attachments/assets/dfd4bd4b-bfe2-4e70-8b35-01f131e3a0e6" />
 
 
-> **설명:** 서버 프로그램 실행 후 PowerShell/cmd에서 9000번 포트로 연결하여 메시지를 수신한 성공 화면입니다.
-<img width="1558" height="812" alt="image" src="https://github.com/user-attachments/assets/dfd4bd4b-bfe2-4e70-8b35-01f131e3a0e6" />
+> **설명:** 수업 이후 로컬 환경(`127.0.0.1:9000`)에서 서버를 직접 실행한 뒤, 텔넷(Telnet) 클라이언트를 통해 메시지를 전송하고 서버 콘솔 창에 실시간으로 데이터가 정상 수신되는 것을 확인한 화면입니다.
