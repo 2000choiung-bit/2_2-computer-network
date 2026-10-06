@@ -1,0 +1,121 @@
+' UDP PLOT CHAT
+Imports System.Net
+Imports System.Net.Sockets
+Imports System.Reflection.Emit
+Imports System.Text
+Imports System.Threading
+Imports System.Windows.Forms.VisualStyles.VisualStyleElement
+
+Public Class Form1
+    Shared client As UdpClient
+    Shared receivePoint As IPEndPoint
+    Dim RX_Data As String
+    Dim PaintNow As Boolean
+    Dim WhiteBoard As New Bitmap(640, 480)
+    Dim PEER_X As Integer
+    Dim PEER_Y As Integer
+    Dim data As Byte()
+    Dim FIRST_RUN As Boolean
+    Dim PEN As New System.Drawing.Pen(Color.Red, 10)
+    Dim PEER_PEN As New System.Drawing.Pen(Color.Blue, 10)
+
+    Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        receivePoint = New IPEndPoint(New IPAddress(0), 0)
+        client = New UdpClient(5000)
+        Dim thread As Thread = New Thread(New ThreadStart(AddressOf WaitForPackets))
+        thread.Start()
+        FIRST_RUN = True
+        Button1.Text = "메시지 송신"
+        Button2.Text = "종료"
+        Label1.Text = "메시지"
+        PaintNow = False
+        PictureBox1.Left = 0
+        PictureBox1.Top = 0
+        PictureBox1.Size = New System.Drawing.Size(640, 480)
+        PictureBox1.BorderStyle = BorderStyle.FixedSingle
+        Me.Width = 800
+        Me.Height = 600
+        ListBox1.Left = 0
+        ListBox1.Top = 485
+        ListBox1.Width = 200
+        Label1.Left = 250
+        Label1.Top = 485
+        TextBox1.Left = 300
+        TextBox1.Top = 485
+        Button1.Left = 300
+        Button1.Top = 510
+        Button2.Left = 310 + Button1.Width
+        Button2.Top = 510
+        ComboBox1.Left = 310 + TextBox1.Width
+        ComboBox1.Top = 485
+        ComboBox1.Items.Add("RED")
+        ComboBox1.Items.Add("GREEN")
+        ComboBox1.Items.Add("BLUE")
+        ComboBox1.SelectedIndex = 0
+        PEER_X = 0
+        PEER_Y = 0
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        Dim data As Byte() = Encoding.UTF7.GetBytes(TextBox1.Text)
+        client.Send(data, data.Length, "127.0.0.1", 5000)
+    End Sub
+
+    Private Sub WaitForPackets()
+        While True
+            Dim myGraphics As Graphics = PictureBox1.CreateGraphics
+            Dim data As Byte() = client.Receive(receivePoint)
+            RX_Data = Encoding.UTF7.GetString(data)
+            Updates_List(Encoding.UTF7.GetString(data))
+            If RX_Data.Substring(0, 1) = "X" Then
+                PEER_X = Val(RX_Data.Substring(1))
+            End If
+            If RX_Data.Substring(0, 1) = "Y" Then
+                PEER_Y = Val(RX_Data.Substring(1))
+            End If
+            myGraphics.DrawLine(PEER_PEN, PEER_X + 2, PEER_Y + 2, PEER_X + 3, PEER_Y + 3)
+        End While
+    End Sub
+
+    Delegate Sub Update_Invoke(ByVal Str As String)
+
+    Private Sub Updates_List(Str As String)
+        If ListBox1.InvokeRequired Then
+            ListBox1.Invoke(New Update_Invoke(AddressOf Updates_List), New Object() {Str})
+        Else
+            If ListBox1.Items.Count > 50 Then ListBox1.Items.Clear()
+            ListBox1.Items.Add(Str.ToString())
+            ListBox1.SelectedIndex = ListBox1.Items.Count - 1
+        End If
+    End Sub
+
+    Private Sub PictureBox1_MouseUp(sender As Object, e As MouseEventArgs) Handles PictureBox1.MouseUp
+        PaintNow = False
+        Updates_List("그리기 ON")
+    End Sub
+
+    Private Sub PictureBox1_MouseDown(sender As Object, e As MouseEventArgs) Handles PictureBox1.MouseDown
+        PaintNow = True
+        Updates_List("그리기 OFF")
+    End Sub
+
+    Private Sub PictureBox1_MouseMove(sender As Object, e As MouseEventArgs) Handles PictureBox1.MouseMove
+        If PaintNow = True Then
+            Dim myGraphics As Graphics = PictureBox1.CreateGraphics
+            myGraphics.DrawLine(PEN, e.X, e.Y, e.X + 1, e.Y + 1)
+            data = Encoding.UTF7.GetBytes("X" & e.X.ToString())
+            client.Send(data, data.Length, "127.0.0.1", 5000)
+            data = Encoding.UTF7.GetBytes("Y" & e.Y.ToString())
+            client.Send(data, data.Length, "127.0.0.1", 5000)
+        End If
+    End Sub
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        End
+    End Sub
+
+    Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox1.SelectedIndexChanged
+        If FIRST_RUN = False Then MessageBox.Show(ComboBox1.Text & " 색이 선택 되었습니다.")
+        If FIRST_RUN = True Then FIRST_RUN = False
+    End Sub
+End Class
